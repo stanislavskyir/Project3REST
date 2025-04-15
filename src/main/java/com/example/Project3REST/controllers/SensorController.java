@@ -3,6 +3,8 @@ package com.example.Project3REST.controllers;
 import com.example.Project3REST.dto.SensorDTO;
 import com.example.Project3REST.models.Sensor;
 import com.example.Project3REST.services.SensorService;
+import com.example.Project3REST.util.ErrorsUtil;
+import com.example.Project3REST.util.MeasurementException;
 import com.example.Project3REST.util.SensorErrorResponse;
 import com.example.Project3REST.util.SensorNotCreatedException;
 import jakarta.validation.Valid;
@@ -15,7 +17,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/sensors")
@@ -29,31 +30,30 @@ public class SensorController {
         this.modelMapper = modelMapper;
     }
 
-    @GetMapping
-    public List<SensorDTO> getAllSensors() {
-        return sensorService.findAll().stream().map(this::convertToSensorDTO)
-                .collect(Collectors.toList());
-    }
 
     @PostMapping("/registration")
     public ResponseEntity<HttpStatus> sensorRegistration(@RequestBody @Valid SensorDTO sensorDTO,
-                                             BindingResult bindingResult) {
+                                                         BindingResult bindingResult) {
 
         Sensor sensorToAdd = convertToSensor(sensorDTO);
 
-        if (bindingResult.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
+//        if (bindingResult.hasErrors()) {
+//            StringBuilder errorMsg = new StringBuilder();
+//
+//            List<FieldError> errors = bindingResult.getFieldErrors();
+//            for (FieldError error : errors) {
+//                errorMsg.append(error.getField())
+//                        .append(" - ").append(error.getDefaultMessage())
+//                        .append(";");
+//            }
+//            throw new SensorNotCreatedException((errorMsg.toString()));
+//        }
 
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors) {
-                errorMsg.append(error.getField())
-                        .append(" - ").append(error.getDefaultMessage())
-                        .append(";");
-            }
-            throw new SensorNotCreatedException((errorMsg.toString()));
+        if (bindingResult.hasErrors()) {
+            throw new SensorNotCreatedException(ErrorsUtil.returnErrorsToClient(bindingResult));
         }
 
-        sensorService.save(sensorToAdd);
+        sensorService.register(sensorToAdd);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -69,9 +69,5 @@ public class SensorController {
 
     private Sensor convertToSensor(SensorDTO sensorDTO) {
         return modelMapper.map(sensorDTO, Sensor.class);
-    }
-
-    private SensorDTO convertToSensorDTO(Sensor sensor) {
-        return modelMapper.map(sensor, SensorDTO.class);
     }
 }
