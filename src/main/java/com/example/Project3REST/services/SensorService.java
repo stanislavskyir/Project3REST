@@ -20,17 +20,12 @@ public class SensorService {
         this.sensorRepository = sensorRepository;
     }
 
-    public List<Sensor> findAll(){ return sensorRepository.findAll();}
-
-//    public Sensor findById(Integer id) {
-//        Optional<Sensor> foundSensor = sensorRepository.findById(id);
-//        return foundSensor.orElseThrow();
-//    }
-
-    public Optional<Sensor> findByName(String name) { return sensorRepository.findByName(name); }
+    public Optional<Sensor> findByName(String name) {
+        return sensorRepository.findByName(name);
+    }
 
     @Transactional
-    public void save(Sensor sensor) {
+    public void register(Sensor sensor) {
         sensorRepository.save(sensor);
     }
 
